@@ -1,5 +1,5 @@
 const BLOCK_SIDE_LENGTH = '54px';
-const BLOCK_COLOR = '#282828'
+const BLOCK_COLOR = '#282828';
 
 var div = document.querySelector('div');
 
@@ -41,13 +41,13 @@ class Block {
     attachEventListener() {
         this.svg.addEventListener('click', () => {
             if (this.isTerminal) {
-                if (gameBoard1.selectedBlock == null) {
+                if (gameBoard.selectedBlock == null) {
                     this.selectBlock();
                 }
                 // if some other terminal block has been selected
-                else if (gameBoard1.selectedBlock != null && gameBoard1.selectedBlock.isTerminal) {
+                else if (gameBoard.selectedBlock != null && gameBoard.selectedBlock.isTerminal) {
                     // previously selected block
-                    gameBoard1.selectedBlock.rect.style = 'none';
+                    gameBoard.selectedBlock.rect.style = 'none';
 
                     this.selectBlock();
                 }
@@ -56,8 +56,24 @@ class Block {
     }
 
     selectBlock() {
-        gameBoard1.selectedBlock = this;
+        gameBoard.selectedBlock = this;
         this.rect.style = 'stroke-width:3;stroke:#F8B400;';
+    }
+
+    deselectBlock() {
+        gameBoard.selectedBlock = null;
+        this.rect.style = 'none';
+    }
+
+    linesSprouting() {
+        return this.svg.querySelectorAll('line').length;
+    }
+
+    canBeTraversed() {
+        // (this.isTerminal && this.linesSprouting() < 3) - before traversing to terminal blocks
+        // this.linesSprouting() == 0 - before traversing to non-terminal block
+        // this.linesSprouting() == 1 - before traversing out of non-terminal block
+        return (this.isTerminal && this.linesSprouting() < 3) || this.linesSprouting() == 0 || this.linesSprouting() == 1;
     }
 
     drawDot() {
@@ -111,6 +127,12 @@ class Block {
         // this always places new line elements after the rect (meaning I can see them)
         // the main reason I'm doing this and not appendChild is that I want my circle (dot) to be the last child of svg
         this.svg.insertBefore(line, this.svg.firstChild.nextSibling);
+
+        // if there are 3 lines sprouting from a terminal block, it's no longer a terminal
+        // if (this.linesSprouting() == 3) {
+        //     this.setTerminal(false);
+        //     this.deselectBlock();
+        // }
     }
 
     eraseLine(lineType) {

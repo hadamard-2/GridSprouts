@@ -29,16 +29,20 @@ class GameBoard {
 
         document.addEventListener('keydown', (e) => {
             if (this.selectedBlock)
-                if (e.key == 'ArrowUp') {
+                if (e.key == 'ArrowUp' && this.selectedBlock.canBeTraversed() &&
+                    this.selectedBlock.northNeighbor != null) {
                     this.goNorth();
-                } else if (e.key == 'ArrowRight') {
+                } else if (e.key == 'ArrowRight' && this.selectedBlock.canBeTraversed() &&
+                    this.selectedBlock.eastNeighbor != null) {
                     this.goEast();
-                } else if (e.key == 'ArrowDown') {
+                } else if (e.key == 'ArrowDown' && this.selectedBlock.canBeTraversed() &&
+                    this.selectedBlock.southNeighbor != null) {
                     this.goSouth();
-                } else if (e.key == 'ArrowLeft') {
+                } else if (e.key == 'ArrowLeft' && this.selectedBlock.canBeTraversed() &&
+                    this.selectedBlock.westNeighbor != null) {
                     this.goWest();
                 }
-        })
+        });
     }
 
     goBack(lineType) {
@@ -83,102 +87,107 @@ class GameBoard {
         }
     }
 
+    chooseNewTerminal() {
+        // effectively the last block in a newly drawn line is not added to the array
+        // since I don't need the first element ('cause it's a terminal) I will remove it from my array
+        this.blocksInNewLine.shift();
+        // generate a random number from 0 upto last index of blocksInNewLine 
+        var randIndex = Math.round(Math.random() * (this.blocksInNewLine.length - 1));
+        this.blocksInNewLine[randIndex].setTerminal(true);
+    }
+
     goNorth() {
-        if (this.selectedBlock.northNeighbor != null) {
-            if (this.blocksInNewLine.length != 0 &&
-                (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.northNeighbor)) {
-                this.goBack('N');
-            } else {
-                // previous block
-                this.selectedBlock.rect.style = 'none';
-                this.selectedBlock.drawLine('N');
-                this.blocksInNewLine.push(this.selectedBlock);
+        if (this.blocksInNewLine.length != 0 &&
+            (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.northNeighbor)) {
+            this.goBack('N');
+        } else if (this.selectedBlock.northNeighbor.canBeTraversed()) {
+            // previous block
+            this.selectedBlock.rect.style = 'none';
+            this.selectedBlock.drawLine('N');
+            this.blocksInNewLine.push(this.selectedBlock);
 
-                // current block
-                this.selectedBlock = this.selectedBlock.northNeighbor;
-                this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
-                this.selectedBlock.drawLine('S');
+            // current block
+            this.selectedBlock = this.selectedBlock.northNeighbor;
+            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.drawLine('S');
 
-                // if the currently selected block is terminal, clear blocksInNewLine
-                if (this.selectedBlock.isTerminal) {
-                    this.blocksInNewLine = [];
-                }
+            // if the currently selected block is terminal, clear blocksInNewLine
+            if (this.selectedBlock.isTerminal) {
+                this.chooseNewTerminal();
+                this.blocksInNewLine = [];
             }
         }
     }
 
     goEast() {
-        if (this.selectedBlock.eastNeighbor != null) {
-            if (this.blocksInNewLine.length != 0 &&
-                (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.eastNeighbor)) {
-                this.goBack('E');
-            } else {
-                // previous block
-                this.selectedBlock.rect.style = 'none';
-                this.selectedBlock.drawLine('E');
-                this.blocksInNewLine.push(this.selectedBlock);
+        if (this.blocksInNewLine.length != 0 &&
+            (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.eastNeighbor)) {
+            this.goBack('E');
+        } else if (this.selectedBlock.eastNeighbor.canBeTraversed()) {
+            // previous block
+            this.selectedBlock.rect.style = 'none';
+            this.selectedBlock.drawLine('E');
+            this.blocksInNewLine.push(this.selectedBlock);
 
-                // current block
-                this.selectedBlock = this.selectedBlock.eastNeighbor;
-                this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
-                this.selectedBlock.drawLine('W');
+            // current block
+            this.selectedBlock = this.selectedBlock.eastNeighbor;
+            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.drawLine('W');
 
-                // if the currently selected block is terminal, clear blocksInNewLine
-                if (this.selectedBlock.isTerminal) {
-                    this.blocksInNewLine = [];
-                }
+            // if the currently selected block is terminal, clear blocksInNewLine
+            if (this.selectedBlock.isTerminal) {
+                this.chooseNewTerminal();
+                this.blocksInNewLine = [];
             }
         }
     }
 
     goSouth() {
-        if (this.selectedBlock.southNeighbor != null) {
-            if (this.blocksInNewLine.length != 0 &&
-                (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.southNeighbor)) {
-                this.goBack('S');
-            } else {
-                // previous block
-                this.selectedBlock.rect.style = 'none';
-                this.selectedBlock.drawLine('S');
-                this.blocksInNewLine.push(this.selectedBlock);
+        if (this.blocksInNewLine.length != 0 &&
+            (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.southNeighbor)) {
+            this.goBack('S');
+        } else if (this.selectedBlock.southNeighbor.canBeTraversed()) {
+            // previous block
+            this.selectedBlock.rect.style = 'none';
+            this.selectedBlock.drawLine('S');
+            this.blocksInNewLine.push(this.selectedBlock);
 
-                // current block
-                this.selectedBlock = this.selectedBlock.southNeighbor;
-                this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
-                this.selectedBlock.drawLine('N');
+            // current block
+            this.selectedBlock = this.selectedBlock.southNeighbor;
+            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.drawLine('N');
 
-                // if the currently selected block is terminal, clear blocksInNewLine
-                if (this.selectedBlock.isTerminal) {
-                    this.blocksInNewLine = [];
-                }
+            // if the currently selected block is terminal, clear blocksInNewLine
+            if (this.selectedBlock.isTerminal) {
+                this.chooseNewTerminal();
+                this.blocksInNewLine = [];
             }
         }
     }
 
     goWest() {
-        if (this.selectedBlock.westNeighbor != null) {
-            if (this.blocksInNewLine.length != 0 &&
-                (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.westNeighbor)) {
-                this.goBack('W');
-            } else {
-                // previous block
-                this.selectedBlock.rect.style = 'none';
-                this.selectedBlock.drawLine('W');
-                this.blocksInNewLine.push(this.selectedBlock);
+        if (this.blocksInNewLine.length != 0 &&
+            (this.blocksInNewLine[this.blocksInNewLine.length - 1] == this.selectedBlock.westNeighbor)) {
+            this.goBack('W');
+        } else if (this.selectedBlock.westNeighbor.canBeTraversed()) {
+            // previous block
+            this.selectedBlock.rect.style = 'none';
+            this.selectedBlock.drawLine('W');
+            this.blocksInNewLine.push(this.selectedBlock);
 
-                // current block
-                this.selectedBlock = this.selectedBlock.westNeighbor;
-                this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
-                this.selectedBlock.drawLine('E');
+            // current block
+            this.selectedBlock = this.selectedBlock.westNeighbor;
+            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.drawLine('E');
 
-                // if the currently selected block is terminal, clear blocksInNewLine
-                if (this.selectedBlock.isTerminal) {
-                    this.blocksInNewLine = [];
-                }
+            // if the currently selected block is terminal, clear blocksInNewLine
+            if (this.selectedBlock.isTerminal) {
+                this.chooseNewTerminal();
+                this.blocksInNewLine = [];
             }
         }
     }
 }
 
 
-const gameBoard1 = new GameBoard();
+const gameBoard = new GameBoard();

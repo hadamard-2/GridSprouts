@@ -1,7 +1,7 @@
 class GameBoard {
     constructor() {
         this.blocksInNewLine = [];
-        this.penDown = false;
+        this.numOfMoves = 0;
 
         this.gameBoard = [];
         this.rows = 11, this.cols = 15;
@@ -52,8 +52,7 @@ class GameBoard {
             this.selectedBlock.eraseLine('N');
             this.selectedBlock.rect.style = 'none';
 
-            this.selectedBlock = this.selectedBlock.northNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.northNeighbor.selectBlock();
             this.selectedBlock.eraseLine('S');
 
             this.blocksInNewLine.pop();
@@ -61,8 +60,7 @@ class GameBoard {
             this.selectedBlock.eraseLine('E');
             this.selectedBlock.rect.style = 'none';
 
-            this.selectedBlock = this.selectedBlock.eastNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.eastNeighbor.selectBlock();
             this.selectedBlock.eraseLine('W');
 
             this.blocksInNewLine.pop();
@@ -70,8 +68,7 @@ class GameBoard {
             this.selectedBlock.eraseLine('S');
             this.selectedBlock.rect.style = 'none';
 
-            this.selectedBlock = this.selectedBlock.southNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.southNeighbor.selectBlock();
             this.selectedBlock.eraseLine('N');
 
             this.blocksInNewLine.pop();
@@ -79,8 +76,7 @@ class GameBoard {
             this.selectedBlock.eraseLine('W');
             this.selectedBlock.rect.style = 'none';
 
-            this.selectedBlock = this.selectedBlock.westNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.westNeighbor.selectBlock();
             this.selectedBlock.eraseLine('E');
 
             this.blocksInNewLine.pop();
@@ -89,11 +85,33 @@ class GameBoard {
 
     chooseNewTerminal() {
         // effectively the last block in a newly drawn line is not added to the array
-        // since I don't need the first element ('cause it's a terminal) I will remove it from my array
+        // since I don't need the first element (because it's a terminal) I will remove it from my array
         this.blocksInNewLine.shift();
-        // generate a random number from 0 upto last index of blocksInNewLine 
-        var randIndex = Math.round(Math.random() * (this.blocksInNewLine.length - 1));
-        this.blocksInNewLine[randIndex].setTerminal(true);
+
+        // // sort them in descending order of openNeighborCount
+        // var sortedBlocksInNewLine = this.blocksInNewLine.sort((prev, current) =>
+        //     current.openNeighborCount() - prev.openNeighborCount()
+        // );
+
+        // // the block with the highest openNeighborCount gets set as the new terminal
+        // sortedBlocksInNewLine[0].setTerminal(true);
+
+        //NOTE - I'm gonna do a something a little extra here. 
+        // Instead of choosing the first element with the highest open neighbor count, 
+        // I will 
+        // - get the highest neighborCount
+        // - filter out the blocks with the highest count
+        // - choose a random block from the filtered list
+
+        var highestOpenNeighborCount = this.blocksInNewLine
+            .reduce((accumulator, current) => accumulator.openNeighborCount() > current.openNeighborCount() ? accumulator : current)
+            .openNeighborCount();
+
+        var filteredBlocksInNewLine = this.blocksInNewLine.filter((block) => block.openNeighborCount() == highestOpenNeighborCount);
+
+        // generate a random number from 0 upto last index of filteredBlocksInNewLine 
+        var randIndex = Math.round(Math.random() * (filteredBlocksInNewLine.length - 1));
+        filteredBlocksInNewLine[randIndex].setTerminal(true);
     }
 
     goNorth() {
@@ -107,14 +125,19 @@ class GameBoard {
             this.blocksInNewLine.push(this.selectedBlock);
 
             // current block
-            this.selectedBlock = this.selectedBlock.northNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.northNeighbor.selectBlock();
             this.selectedBlock.drawLine('S');
 
             // if the currently selected block is terminal, clear blocksInNewLine
             if (this.selectedBlock.isTerminal) {
                 this.chooseNewTerminal();
                 this.blocksInNewLine = [];
+                this.numOfMoves++;
+                if (this.numOfMoves % 2 == 0) {
+                    dotColor = lineColor = '#F8B400';
+                } else {
+                    dotColor = lineColor = '#0F90D1';
+                }
             }
         }
     }
@@ -130,14 +153,19 @@ class GameBoard {
             this.blocksInNewLine.push(this.selectedBlock);
 
             // current block
-            this.selectedBlock = this.selectedBlock.eastNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.eastNeighbor.selectBlock();
             this.selectedBlock.drawLine('W');
 
             // if the currently selected block is terminal, clear blocksInNewLine
             if (this.selectedBlock.isTerminal) {
                 this.chooseNewTerminal();
                 this.blocksInNewLine = [];
+                this.numOfMoves++;
+                if (this.numOfMoves % 2 == 0) {
+                    dotColor = lineColor = '#F8B400';
+                } else {
+                    dotColor = lineColor = '#0F90D1';
+                }
             }
         }
     }
@@ -153,14 +181,19 @@ class GameBoard {
             this.blocksInNewLine.push(this.selectedBlock);
 
             // current block
-            this.selectedBlock = this.selectedBlock.southNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.southNeighbor.selectBlock();
             this.selectedBlock.drawLine('N');
 
             // if the currently selected block is terminal, clear blocksInNewLine
             if (this.selectedBlock.isTerminal) {
                 this.chooseNewTerminal();
                 this.blocksInNewLine = [];
+                this.numOfMoves++;
+                if (this.numOfMoves % 2 == 0) {
+                    dotColor = lineColor = '#F8B400';
+                } else {
+                    dotColor = lineColor = '#0F90D1';
+                }
             }
         }
     }
@@ -176,14 +209,19 @@ class GameBoard {
             this.blocksInNewLine.push(this.selectedBlock);
 
             // current block
-            this.selectedBlock = this.selectedBlock.westNeighbor;
-            this.selectedBlock.rect.style = 'stroke-width:3;stroke:#F8B400;';
+            this.selectedBlock.westNeighbor.selectBlock();
             this.selectedBlock.drawLine('E');
 
             // if the currently selected block is terminal, clear blocksInNewLine
             if (this.selectedBlock.isTerminal) {
                 this.chooseNewTerminal();
                 this.blocksInNewLine = [];
+                this.numOfMoves++;
+                if (this.numOfMoves % 2 == 0) {
+                    dotColor = lineColor = '#F8B400';
+                } else {
+                    dotColor = lineColor = '#0F90D1';
+                }
             }
         }
     }

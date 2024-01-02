@@ -1,13 +1,14 @@
 const BLOCK_SIDE_LENGTH = '54px';
 const BLOCK_COLOR = '#282828';
 
+var dotColor = '#F8B400';
+var lineColor = '#F8B400';
+
 var div = document.querySelector('div');
 
 class Block {
     constructor(initialState) {
         this.isTerminal = false;
-        this.prevState = null;
-        this.state = initialState;
 
         // create an svg
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -52,28 +53,40 @@ class Block {
                     this.selectBlock();
                 }
             }
+            // test code
+            else {
+                console.log(this.openNeighborCount());
+            }
         });
+    }
+
+    openNeighborCount() {
+        var openNeighborCount = 0;
+        var neighbors = [this.northNeighbor, this.eastNeighbor, this.southNeighbor, this.westNeighbor];
+
+        neighbors.forEach((neighbor) => {
+            if (neighbor && !neighbor.isTerminal && (neighbor.lineCount() == 0)) {
+                openNeighborCount++;
+            }
+        });
+
+        return openNeighborCount;
     }
 
     selectBlock() {
         gameBoard.selectedBlock = this;
-        this.rect.style = 'stroke-width:3;stroke:#F8B400;';
+        this.rect.style = `stroke-width:3;stroke:${lineColor};`;
     }
 
-    deselectBlock() {
-        gameBoard.selectedBlock = null;
-        this.rect.style = 'none';
-    }
-
-    linesSprouting() {
+    lineCount() {
         return this.svg.querySelectorAll('line').length;
     }
 
     canBeTraversed() {
-        // (this.isTerminal && this.linesSprouting() < 3) - before traversing to terminal blocks
-        // this.linesSprouting() == 0 - before traversing to non-terminal block
-        // this.linesSprouting() == 1 - before traversing out of non-terminal block
-        return (this.isTerminal && this.linesSprouting() < 3) || this.linesSprouting() == 0 || this.linesSprouting() == 1;
+        // (this.isTerminal && this.lineCount() < 3) - before traversing to terminal blocks
+        // this.lineCount() == 0 - before traversing to non-terminal block
+        // this.lineCount() == 1 - before traversing out of non-terminal block
+        return (this.isTerminal && this.lineCount() < 3) || this.lineCount() == 0 || this.lineCount() == 1;
     }
 
     drawDot() {
@@ -82,7 +95,7 @@ class Block {
         dot.setAttribute('cx', '27');
         dot.setAttribute('cy', '27');
         dot.setAttribute('r', '8');
-        dot.setAttribute('fill', '#F8B400');
+        dot.setAttribute('fill', dotColor);
 
         this.svg.appendChild(dot)
     }
@@ -90,7 +103,7 @@ class Block {
     drawLine(lineType) {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 
-        line.setAttribute('stroke', '#F8B400');
+        line.setAttribute('stroke', lineColor);
         line.setAttribute('stroke-width', '6');
 
         var lineType = lineType.toUpperCase();

@@ -53,10 +53,6 @@ class Block {
                     this.selectBlock();
                 }
             }
-            // test code
-            else {
-                console.log(this.openNeighborCount());
-            }
         });
     }
 
@@ -73,20 +69,45 @@ class Block {
         return openNeighborCount;
     }
 
-    selectBlock() {
-        gameBoard.selectedBlock = this;
-        this.rect.style = `stroke-width:3;stroke:${lineColor};`;
+    selectBlock(neighborType) {
+        if (neighborType) {
+            switch (neighborType) {
+                case 'N':
+                    this.northNeighbor.selectBlock();
+                    break;
+                case 'E':
+                    this.eastNeighbor.selectBlock();
+                    break;
+                case 'S':
+                    this.southNeighbor.selectBlock();
+                    break;
+                case 'W':
+                    this.westNeighbor.selectBlock();
+                    break;
+            }
+        } else {
+            gameBoard.selectedBlock = this;
+            this.rect.style = `stroke-width:3;stroke:${lineColor};`;
+        }
     }
 
     lineCount() {
         return this.svg.querySelectorAll('line').length;
     }
 
-    canBeTraversed() {
-        // (this.isTerminal && this.lineCount() < 3) - before traversing to terminal blocks
-        // this.lineCount() == 0 - before traversing to non-terminal block
-        // this.lineCount() == 1 - before traversing out of non-terminal block
-        return (this.isTerminal && this.lineCount() < 3) || this.lineCount() == 0 || this.lineCount() == 1;
+    thereIsLine(lineType) {
+        return this.svg.querySelectorAll(`.${lineType}`).length != 0;
+    }
+
+    canBeTraversed(lineTypeFull) {
+        if (!this[lineTypeFull + 'Neighbor'])
+            return false;
+
+        if (this.isTerminal) {
+            return this.lineCount() < 3 && !this.thereIsLine(lineTypeFull[0].toUpperCase());
+        } else {
+            return this.lineCount() < 2;
+        }
     }
 
     drawDot() {
@@ -142,9 +163,8 @@ class Block {
         this.svg.insertBefore(line, this.svg.firstChild.nextSibling);
 
         // if there are 3 lines sprouting from a terminal block, it's no longer a terminal
-        // if (this.linesSprouting() == 3) {
+        // if (this.lineCount() == 3) {
         //     this.setTerminal(false);
-        //     this.deselectBlock();
         // }
     }
 
